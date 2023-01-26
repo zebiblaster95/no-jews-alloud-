@@ -1,0 +1,114 @@
+# Scriptnaam:   ProcessCheck Sjabloon.txt
+# functie   :   check processen van een server tegen een whitelist
+# Auteur    :   Stichting PraktijkLeren, BvdF
+# Versie    :   0.5
+# datum     :   23 december 2021
+#
+# Argumenten [minuten-numerieke string [servernaam-alfanumerieke string]]
+#
+# de comments die beginnen en eindigen met *** zijn aanwijzingen voor jouw opdracht
+#
+$minuten = 10;                                   # Zetten van default waarden
+$server = "SRV001";    
+$whiteListFile = "C:\Users\ZAZA\Downloads\WhiteList.txt"
+$signaleringenfile = "C:\Users\ZAZA\Downloads\Signaleringen.txt"
+
+# *** zorg dat als het aantal minuten wordt meegegeven bij de start deze de default waarde vervangt ***
+# *** zorg dat als een servernaam wordt meegegegevn bij de start dat die de default waarde overschrijft ***
+# Ask for user input for server name and minutes
+
+$server = Read-Host -Prompt "Enter the server name"
+
+$minutes = Read-Host -Prompt "Enter the number of minutes"
+
+# Use the user input in the script
+
+Write-Host "The server name is: $server"
+
+Write-Host "The number of minutes is: $minutes"
+
+
+$periode = New-timespan -minutes $minuten;      # bereid de tijdsinterval voor
+$startTijd = Get-Date;
+$stopTijd = (Get-Date) + $periode;
+
+Write-Host "`nProcesChecker is gestart om", $startTijd, "op server", $server, "voor een periode van", $minuten, "minuten";
+Set-Content -path $signaleringenFile -value $server, $datum;    # maak lege signaleringenfile
+[string[]]$arrayMetWhiteList = Get-Content -Path $whiteListFile # lees de witelist in een array
+
+$startTime = Get-Date
+$elapsedMinutes = 10
+
+While ($elapsedMinutes -lt $minuten) {
+    [string[]]$arrayMetProcessen = invoke-command -Computer $server {Get-Process | Select-Object -Expandproperty name}
+    Foreach ($ProcessName in $arrayMetProcessen) {
+        If (-Not ($arrayMetWhiteList -Match $processName)) {    # proces in de WhiteList?
+            $answer = Read-Host -Prompt "Proces", $processName, "is onbekend, toevoegen aan whitelist (y/n)?";
+            While (($answer -ne "y") -And ($answer -ne "n")) {
+                $answer = Read-Host -Prompt "Keuze (y/n)";
+            }
+            If ($answer -Eq 'y') {                              # procesnaam toevoegen aan whitelist
+                $arrayMetWhiteList += $processName;             
+            }
+            Else {                                              # procesnaam toevoegen aan signaleringen
+                Add-Content -Path $signaleringenFile -Value $processName
+            }
+        }
+    }
+    $elapsedMinutes = (New-TimeSpan -Start $startTime).TotalMinutes
+}
+
+    # *** zorg dat ik iets op het scherm zie bewegen gedurende de 5 seconden tussen de herhalingen ***
+    Wait-Event  -TimeOut 5       # heartbeat, wachtperiode tussen de herhalingen in 
+
+for ($i=0; $i -lt 5; $i++) {
+    Write-Host "Een moment geduld aub"
+    Start-Sleep -Seconds 1
+}
+
+# nu komen de afsluitende acties, whitelist naar bestand zetten en signaleringen printen
+
+# *** vraag of de whitelist leeg gemaakt moet worden, accepteer alleen y en n *** 
+# *** als de whitelist leeg moet schrijf een lege whitelist weg, anders de huidige ***
+$arrayMetWhiteList | Out-File $whiteListFile;
+
+$answer = Read-Host -Prompt "Whitelist leegmaken (y/n)?";
+
+While (($answer -ne "y") -And ($answer -ne "n")) {
+
+$answer = Read-Host -Prompt "Invalid input, please enter y or n";
+
+}
+
+If ($answer -Eq 'y') {
+
+Set-Content -path $whiteListFile -value $null;
+
+}
+
+
+# *** vraag of de signaleringen op het scherm moeten komen, accepteer y om te printen, iets anders zie je als n ***
+# *** indien y: druk de signaleringen netjes af op het scherm ***
+Write-Host "`n`n======================`nSignaleringen van", $startTijd, "tot", $stopTijd;
+$answer = Read-Host -Prompt "Print the alert messages (y/n)?";
+
+While (($answer -ne "y") -And ($answer -ne "n")) {
+
+$answer = Read-Host -Prompt "Invalid input, please enter y or n";
+
+$answer = Read-Host -Prompt "Invalid input, please enter y or n";
+
+}
+
+If ($answer -Eq 'y') {
+
+$contents = Get-Content $signaleringenfile
+
+Write-Host $contents
+
+
+}
+
+# *** voeg de einddatum/tijd toe aan de afsluitende boodschap
+Write-Host "======================`nProcesChecker is beeindigd om ", "`n" ;
+Get-Date
