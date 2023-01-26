@@ -10,8 +10,8 @@
 #
 $minuten = 10;                                   # Zetten van default waarden
 $server = "SRV001";    
-$whiteListFile = "C:\Users\ZAZA\Downloads\WhiteList.txt"
-$signaleringenfile = "C:\Users\ZAZA\Downloads\Signaleringen.txt"
+$whiteListFile = "C:\Users\ZAZA\Downloads\WhiteList.txt" (verander deze path)
+$signaleringenfile = "C:\Users\ZAZA\Downloads\Signaleringen.txt" (verander deze path)
 
 # *** zorg dat als het aantal minuten wordt meegegeven bij de start deze de default waarde vervangt ***
 # *** zorg dat als een servernaam wordt meegegegevn bij de start dat die de default waarde overschrijft ***
@@ -62,7 +62,7 @@ While ($elapsedMinutes -lt $minuten) {
     Wait-Event  -TimeOut 5       # heartbeat, wachtperiode tussen de herhalingen in 
 
 for ($i=0; $i -lt 5; $i++) {
-    Write-Host "Een moment geduld aub"
+    Write-Host "Een moment geduld aub"   ( verander die "een moment geduld aub" naar je eigen command )
     Start-Sleep -Seconds 1
 }
 
