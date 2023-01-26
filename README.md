@@ -19,7 +19,7 @@ hier onder staan de sql query's
 
 
 1. Query 1: Laat door middel van een query alle velden van tabel processen zien.
-Antwoord: SELEsCT * from processen;
+Antwoord: SELECT * from processen;
 
 2. Query 2: Laat door middel van een query de velden Name en CPU van tabel processen zien.
 Antwoord: SELECT Name, CPU FROM processen;
